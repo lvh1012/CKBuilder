@@ -1,0 +1,11 @@
+[[cells]]
+name = "hello-world"
+enable_type_id = false
+
+  [cells.location]
+  file = "D:\\Code\\CKB\\ckb-rust-script\\build\\release\\hello-world"
+
+[lock]
+code_hash = "0x9bd7e06f3ecf4be0f2fcd2188b23f1b9fcc88e5d4b65a8637b17723bbda3cce8"
+args = "0x6119cb4bb70561a59b4423dd04680b593fe1d0fc"
+hash_type = "type"
