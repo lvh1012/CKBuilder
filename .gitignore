@@ -1,0 +1,27 @@
+# --- Rust / ckb-script-templates (same defaults as the template) ---
+/build
+/target
+/contracts/*/build
+/contracts/*/target
+# Transactions dumped by ckb-testtool when a test fails; useful locally with ckb-debugger, noise in git.
+/tests/failed_txs
+/Cargo.lock
+
+# --- Secrets: never commit keys, even testnet ones ---
+.privkey
+.env
+.env.*
+!.env.example
+
+# --- Node / CCC dApps (offckb create, Next.js) ---
+node_modules/
+.next/
+dist/
+
+# --- Local tooling and OS files ---
+# Serena is personal AI-assistant config, not part of the CKBuilder deliverables.
+.serena/
+.vscode/
+.idea/
+.DS_Store
+Thumbs.db
