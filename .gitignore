@@ -1,6 +1,0 @@
-/build
-/target
-/tests/failed_txs
-/Cargo.lock
-
-.privkey
