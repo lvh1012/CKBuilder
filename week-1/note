@@ -1,0 +1,106 @@
+# Completed
+
+Bitcoin whitepaper
+Nervos Nation videos: the videos on UTXO/PoW and the Cell Model.
+Introduction to Nervos CKB.
+A1 CKB basic theoretical knowledge
+
+# Key learnings
+
+1. Bài toán cốt lõi: Trust
+   hệ thống dùng chung dựa trên chứng cứ mật mã thay vì niềm tin, cho phép hai bên sẵn sàng tham gia tiến hành giao dịch trực tiếp với nhau mà không cần phải có một bên thứ ba được tin cậy.
+   => Blockchain là một sổ cái (ledger) phân tán, chỉ cho phép thêm vào cuối (append-only), trong đó các node độc lập cùng thống nhất về trạng thái bằng một quy tắc đồng thuận.
+2. Hash function: Hash function nhận đầu vào bất kỳ (một câu, một file 1GB) và trả về một chuỗi có độ dài cố định. Với SHA-256, đầu ra luôn có 256 bit (64 ký tự hex).
+
+- Tính chất:
+  - Deterministic Cùng đầu vào → cùng đầu ra: Mọi node tự tính và phải ra cùng kết quả
+  - Preimage resistance Từ hash không suy ngược được đầu vào: Có thể công bố hash mà không lộ dữ liệu
+  - Collision resistance Rất khó tìm hai đầu vào có cùng hash: Không ai thay dữ liệu mà giữ nguyên hash
+  - Avalanche Đổi nhỏ đầu vào → đổi lớn đầu ra: Sửa dữ liệu là lộ ra ngay
+    CKB dùng Blake2b-256 thay vì SHA-256
+
+3. Khóa công khai và khóa bí mật
+   Đây là mật mã bất đối xứng, gồm một cặp khóa:
+
+Private key (khóa bí mật): một số ngẫu nhiên lớn. Không được lộ.
+Public key (khóa công khai): tính từ private key bằng phép toán một chiều. Có thể công khai.
+Address (địa chỉ): thường là hash của public key, ngắn hơn và dễ chia sẻ hơn.
+private key ──(nhân điểm trên đường cong elliptic)──► public key ──(hash)──► address
+▲ │
+└──────── không thể đi ngược từ public key về private key ──────────────┘
+
+Trong CKB, khóa mặc định dùng đường cong secp256k1, cùng đường cong với Bitcoin và Ethereum
+
+4. Chữ ký số
+   Có hai thao tác:
+
+sign(message, private_key) → signature
+verify(message, signature, public_key) → true/false
+
+Chữ ký đảm bảo ba điều:
+
+Authenticity (xác thực): đúng người ký.
+Integrity (toàn vẹn): nội dung không bị sửa sau khi ký.
+Non-repudiation (không chối bỏ): người ký không thể nói "tôi không ký".
+
+5. Cấu trúc một block
+   ┌─────────────── BLOCK ───────────────┐
+   │ HEADER │
+   │ prev_hash ← hash của block trước│
+   │ merkle_root ← hash gốc của cây │
+   │ các giao dịch │
+   │ timestamp │
+   │ nonce ← số dùng để đào │
+   │ difficulty │
+   │ BODY │
+   │ [tx1, tx2, tx3, ...] │
+   └──────────────────────────────────────┘
+   Merkle tree (cây Merkle): thay vì hash toàn bộ giao dịch cùng lúc, ta hash từng cặp rồi hash tiếp cho đến khi còn một giá trị gốc. Nhờ vậy, có thể chứng minh một giao dịch thuộc block mà không cần tải toàn bộ block
+
+6. Chain: vì sao sửa lịch sử khó
+   Mỗi block chứa prev_hash là hash của block trước. Điều này tạo thành chuỗi:
+
+Block 4 ◄─── Block 5 ◄─── Block 6 ◄─── Block 7
+hash=A prev=A prev=B prev=C
+hash=B hash=C hash=D
+Thử tưởng tượng bạn là kẻ tấn công, muốn sửa một giao dịch trong Block 5:
+Sửa dữ liệu Block 5 → hash của Block 5 đổi từ B thành B′.
+Block 6 có prev_hash = B, giờ không còn khớp với B′. Bạn phải tính lại Block 6.
+Block 6 đổi hash, nên Block 7 cũng phải tính lại.
+Cứ thế, đến block mới nhất.
+Đây là lý do lịch sử "gần như không thể sửa": mỗi block mới làm tăng công sức cần thiết để viết lại. Nếu chuỗi đã dài, bạn phải làm lại toàn bộ công việc mà mạng đã làm.
+
+Nhưng chỉ liên kết hash thì chưa đủ. Kẻ tấn công vẫn có thể tự tính lại tất cả hash rất nhanh. Vì vậy cần thêm yếu tố tốn công thật sự, đó là Proof of Work.
+
+7. Proof of Work (PoW)
+   muốn thêm block mới, bạn phải tìm một số nonce sao cho hash của block header nhỏ hơn một ngưỡng (target). Vì hash không đoán được, cách duy nhất là thử lần lượt
+   Hai điều quan sát được:
+
+Tìm nonce tốn nhiều công.
+Kiểm tra nonce rất rẻ. Chỉ cần một lần hash là đủ.
+Đây là bất đối xứng công việc: người tạo block tốn điện và phần cứng, còn người kiểm tra gần như không tốn gì. Bitcoin dùng SHA-256. CKB dùng thuật toán Eaglesong cho PoW, và có cơ chế điều chỉnh độ khó tự động.
+
+8. Double-spend và cách PoW ngăn chặn
+
+Double-spend (chi tiêu kép): Alice có 10 coin, cố gắng gửi cho Bob và cũng gửi cho Carol cùng một số tiền. Nếu cả hai giao dịch cùng được chấp nhận, hệ thống bị gian lận.
+
+PoW và quy tắc "chuỗi dài nhất (hay chuỗi có nhiều công việc nhất) là chuỗi đúng" giải quyết việc này:
+
+Hai giao dịch chi tiêu cùng một coin sẽ nằm trên hai nhánh khác nhau.
+Các node chỉ chấp nhận nhánh có tổng công việc lớn nhất.
+Để đảo ngược giao dịch đã được xác nhận nhiều block, kẻ tấn công phải tạo một nhánh dài hơn toàn mạng, nghĩa là sở hữu phần lớn sức mạnh tính toán
+
+9. Mô hình Account (giống ngân hàng) thống có một bảng trạng thái toàn cục: mỗi địa chỉ có một số dư
+
+10. Mô hình UTXO (giống tiền mặt) Không có khái niệm "số dư" trực tiếp. Thay vào đó, hệ thống theo dõi các UTXO (Unspent Transaction Output): những khoản tiền chưa tiêu
+    Quy tắc bất biến: tổng input ≥ tổng output, và phần chênh lệch là phí cho thợ đào (miner).
+
+Điểm mấu chốt: A1 và A2 sau giao dịch đã bị tiêu (spent). Nếu ai đó cố tạo giao dịch khác dùng A1 lần nữa, node sẽ từ chối ngay, vì A1 không còn là UTXO. Đây chính là cách UTXO chống double-spend một cách tự nhiên.
+
+11. Nervos CKB: tổng quan
+    Nervos là một mạng lưới blockchain gồm nhiều lớp:
+
+CKB (Common Knowledge Base): lớp 1 (Layer 1), là sổ cái gốc
+Các lớp mở rộng (Layer 2):
+Các đặc điểm của CKB
+CKByte là token gốc. Điều thú vị là 1 CKByte tương ứng 1 byte dữ liệu on-chain. Muốn lưu 100 byte trạng thái, bạn phải giữ 100 CKByte trong cell đó.
