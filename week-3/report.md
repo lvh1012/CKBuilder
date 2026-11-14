@@ -3,21 +3,44 @@
 ## Completed
 
 - Docs:
-  - [Quick start](https://docs.nervos.org/docs/getting-started/quick-start): networks (devnet, testnet, mainnet) and RPC
+  - [Quick start](https://docs.nervos.org/docs/getting-started/quick-start)
   - [CKB-CLI](https://docs.nervos.org/docs/sdk-and-devtool/ckb-cli)
-- Testnet node: [CKB light client](https://github.com/nervosnetwork/ckb-light-client) v0.5.4 on testnet. A full node needs at least 200 GB of free disk and can take days to sync; this machine has 45 GB free.
-- Tutorial #1: [Transfer CKB](https://docs.nervos.org/docs/dapp/transfer-ckb), using the [simple-transfer](https://github.com/nervosnetwork/docs.nervos.org/tree/develop/examples/dApp/simple-transfer) example on **testnet** (Week 1 ran the same app on devnet; see [week-1/src/simple-transfer](../week-1/src/simple-transfer/))
-- Code: none added this week; the dApp runs unmodified from a clone of the docs repository
+- Testnet node: [CKB light client](https://github.com/nervosnetwork/ckb-light-client) v0.5.4 on testnet. A full node needs at least 200 GB of free disk and can take days to sync;
+- Tutorial #1: [Transfer CKB](https://docs.nervos.org/docs/dapp/transfer-ckb), using the [simple-transfer](https://github.com/nervosnetwork/docs.nervos.org/tree/develop/examples/dApp/simple-transfer) example on **testnet**
 
 ## Key learnings
 
-1. **Three networks, three separate states.** Devnet, testnet (Pudge) and mainnet share no balances. A devnet account has no CKB on testnet, so the testnet run needs its own account funded with test CKB. The address prefix tells the network: `ckt1…` is testnet, `ckb1…` is mainnet. Public testnet RPC endpoints such as `https://testnet.ckb.dev/` are run by community members. The docs warn that they may be unstable and should not be used in production, and that the testnet may occasionally reset.
+1. **Three networks, three separate states.** Devnet, testnet (Pudge) and mainnet share no balances. A devnet account has no CKB on testnet, so a testnet account must be funded with test CKB. The address prefix tells the network: `ckt1…` is testnet, `ckb1…` is mainnet.
 
-2. **Full node vs. light client.** The docs ask for at least 200 GB of free disk and say a testnet sync from genesis can take up to several days. With 45 GB free, a full node was not an option, so I ran the CKB light client (`v0.5.4`, `config/testnet.toml`). The default Linux build of v0.5.4 links against glibc 2.38 and refused to start on my Ubuntu (glibc 2.35); the `-portable` build only needs glibc 2.34, so I used that one. Its RPC listens on `127.0.0.1:9000` and its P2P service on port 8118. Its RPC is not identical to the full node's RPC: it adds `set_scripts` / `get_scripts` (which scripts to track), `fetch_header` and `fetch_transaction`.
+2. **Full node vs. light client.**
+   - A full node downloads and verifies every block. The docs ask for at least 200 GB of free disk, and syncing from genesis may take up to several days.
+   - A light client verifies the chain with limited resources: it downloads only a small sample of block headers, and a full block only when a filter says the block has data for the scripts registered with it. Its data stays small (about 10 MB on testnet).
+   - Its RPC listens on `127.0.0.1:9000` and differs from a full node's RPC: it adds `set_scripts` / `get_scripts` to choose which scripts to track, and `fetch_header` / `fetch_transaction`.
 
-3. **JSON-RPC conventions.** Every call is an HTTP `POST` with a JSON body. Numbers are `0x`-prefixed hex strings without leading zeros, so a cell index is `"0x0"`, and a capacity of `0x2540be400` is 100 CKB (10^8 shannons per CKB). `get_transaction` returns `tx_status.status` (`pending`, `proposed` or `committed`) and returns `null` if the transaction is neither committed nor in the mempool. `get_live_cell` takes an OutPoint and a `with_data` boolean and reports `status: "live"` for an unspent cell. `send_transaction` is asynchronous, so a returned hash does not mean the transaction is verified; poll `get_transaction`.
+   Sources: [run a testnet node](https://docs.nervos.org/docs/node/run-testnet-node), [RFC 0044](https://github.com/nervosnetwork/rfcs/blob/master/rfcs/0044-ckb-light-client/0044-ckb-light-client.md), [RFC 0045](https://github.com/nervosnetwork/rfcs/blob/master/rfcs/0045-client-block-filter/0045-client-block-filter.md) and the [light client README](https://github.com/nervosnetwork/ckb-light-client).
 
-4. **Fees: the rate matters, not the amount.** A fee is `fee_rate × transaction size / 1000`, with the rate in shannons per kB (the size used is 4 bytes more than the Explorer's Size field; see item 6). The transactions I have sent so far:
+3. **JSON-RPC 2.0.** A stateless, lightweight remote-procedure-call protocol with JSON messages; the specification does not fix a transport.
+   - **Request:** `jsonrpc` (exactly `"2.0"`), `method`, an optional `params` (an array or an object) and an `id`. A request without an `id` is a notification and gets no response.
+   - **Response:** repeats the `id` and carries either `result` or `error`. An error has an integer `code`, a `message` and optional `data`. Reserved codes include −32700 Parse error, −32600 Invalid Request, −32601 Method not found and −32602 Invalid params.
+   - **Batch:** an array of requests; the responses come back as an array, in any order, and are matched to the requests by `id`.
+   - **Example:** `{"jsonrpc":"2.0","method":"get_tip_block_number","params":[],"id":1}` is answered by `{"jsonrpc":"2.0","result":"0x15fd50a","id":1}`.
+
+   Source: the [JSON-RPC 2.0 specification](https://www.jsonrpc.org/specification).
+
+4. **CKB JSON-RPC protocols.** CKB adds its own conventions on top of JSON-RPC 2.0:
+   - **Transports.** By default the node serves HTTP on `127.0.0.1:8114`; it can also bind TCP and WebSocket listeners (`tcp_listen_address` and `ws_listen_address` in `ckb.toml`, commented out by default, with example ports 18114 and 28114). Over HTTP every call is a `POST` with a JSON body, and a `GET` is rejected. The light client's RPC listens on `127.0.0.1:9000`.
+   - **Modules.** Methods are grouped into modules (`Chain`, `Pool`, `Net`, `Stats`, `Subscription` and others) that `ckb.toml` switches on or off.
+   - **Encoding.** Integers are `0x`-prefixed hex strings without redundant leading zeros, so a cell index is `"0x0"`; a plain JSON number or `"0x00"` is rejected with error −32602. Hashes are `0x`-prefixed 32-byte hex strings. A capacity of `0x2540be400` is 100 CKB (10^8 shannons per CKB).
+   - **`get_transaction`.** It returns `tx_status.status`: `pending` or `proposed` (in the transaction pool), `committed` (in the chain), `unknown` (the node has not seen it) or `rejected` (recently removed from the pool). The `transaction` field holds the transaction only for `pending`, `proposed` and `committed`; otherwise it is `null`.
+   - **`get_live_cell`.** It takes an OutPoint and a `with_data` boolean, and reports `status: "live"` for an unspent cell.
+   - **`send_transaction`.** It is asynchronous, so a returned hash does not mean the transaction is verified; poll `get_transaction`. Verification failures use CKB's own error codes, for example −302 `TransactionFailedToVerify`.
+
+   Source: the [CKB RPC documentation](https://github.com/nervosnetwork/ckb/blob/develop/rpc/README.md) and the default [`ckb.toml`](https://github.com/nervosnetwork/ckb/blob/develop/resource/ckb.toml).
+
+5. **Fees: the rate matters, not the amount.**
+   - A fee is `fee_rate × transaction size / 1000`, with the rate in shannons per kB. It also equals total input capacity minus total output capacity.
+   - The size used for the fee is 4 bytes more than the Explorer's Size field (see item 6).
+   - Fees of the transactions in this report:
 
    | Transaction | Fee | How it was set |
    |---|---|---|
@@ -25,23 +48,21 @@
    | `ckb-cli wallet transfer` | 0.00000464 CKB, 1,000 shannons/kB | `--fee-rate`, default 1,000 shannons/kB |
    | CCC `simple-transfer` | 0.00000465 CKB, 1,002 shannons/kB | `completeFeeBy(signer, 1000)` |
 
-5. **Three ways to build a transaction.** Building a transaction means picking the inputs, adding a change output, setting the fee, signing and sending. `ckb-cli wallet transfer` and CCC do all of this for you. In `simple-transfer`, `transfer()` calls `ccc.Transaction.from(...)`, then `completeInputsByCapacity(signer)` (select inputs and add the change cell), then `completeFeeBy(signer, 1000)` (compute the fee), then `signer.sendTransaction(...)`. This week `ckb-cli` and CCC produced the same shape of transaction: 1 input, 2 outputs (62 CKB and the change), 460 bytes, and fees of 464 and 465 shannons. The second transaction even spent the change cell of the first one (output #1 of the `ckb-cli` transaction). For a real application I would use CCC: it runs in TypeScript next to the frontend, it signs through a `Signer` (a private key or a connected wallet), and the transaction stays editable in code until it is sent. `ckb-cli` suits one-off terminal tasks such as creating an account or checking a balance. Building every field by hand, as in the A2 course, is good for learning the structure but too error-prone for an application.
-
-6. **Self-check: reading a transaction on the Explorer.** I read the transaction sent with `ckb-cli` (Evidence #8): `0x0843fa99d074eb6b161ba198dee551a038192ae8bde6abe15f246329a4e1c0fd`. The first six rows come from its Explorer page (Evidence #9); the rest are under Parameters / Raw, and I read them with `get_transaction`.
+6. **Reading a transaction on the Explorer.** Example: transaction `0x0843fa99d074eb6b161ba198dee551a038192ae8bde6abe15f246329a4e1c0fd` (Evidence #8). The first six rows are on its Explorer page (Evidence #9); the rest are under Parameters / Raw and come from `get_transaction`.
 
    | Field | Value | What it means |
    |---|---|---|
-   | Block Height | 23,057,801 | The block that included the transaction (`tx_status.block_number`). |
-   | Timestamp | 2026/11/14 10:44:59 | The timestamp of that block, shown in local time. A CKB transaction has no timestamp of its own. |
-   | Status | 6 Confirmations | How many blocks have been built on the chain since the transaction was included, as counted by the Explorer at the time of the screenshot. `get_transaction` reports `committed`. |
+   | Block Height | 23,057,801 | The block that included the transaction. |
+   | Timestamp | 2026/11/14 10:44:59 | The timestamp of that block, in local time. A transaction has no timestamp of its own. |
+   | Status | 6 Confirmations | How many blocks have been built on the chain since the transaction was included, as counted by the Explorer. `get_transaction` reports `committed`. |
    | Size | 460 bytes | Serialized size of the whole transaction, witness included. |
-   | Transaction Fee / Fee Rate | 0.00000464 CKB / 1,000 shannons/kB | Fee = total input − total output = 100,000 − 62 − 99,937.99999536 = 0.00000464 CKB (464 shannons). Fee rate = fee ÷ size: 464 shannons ÷ 0.464 kB = 1,000 shannons/kB, the `--fee-rate` I passed. This only works out with a size 4 bytes larger than the displayed 460 bytes; with 460 bytes the rate would be 1,008.6. |
-   | Cycles | 1,645,579 | The CKB-VM execution cost of the Scripts this transaction runs; here the lock Script verifying one secp256k1 signature. |
+   | Transaction Fee / Fee Rate | 0.00000464 CKB / 1,000 shannons/kB | Fee = total input − total output = 100,000 − 62 − 99,937.99999536 CKB (464 shannons). Fee rate = fee ÷ size; it gives 1,000 shannons/kB only with a size 4 bytes larger than the displayed 460 bytes. |
+   | Cycles | 1,645,579 | The CKB-VM execution cost of the Scripts the transaction runs; here the lock Script verifying one secp256k1 signature. |
    | `version` | `0x0` | Transaction version. |
    | `cell_deps` | one `dep_group`: `0xf8de3bb4…5d37`, index 0 | Where the node finds the Script code. This dep group holds the `secp256k1_blake160_sighash_all` code. |
    | `header_deps` | empty | No block header is needed. |
-   | `inputs` | `0x4b9f5871…114a`, index 0; `since` `0x0` | The live cell being consumed (100,000 CKB, locked to my address), identified by its OutPoint. `since` 0 means no time lock. |
-   | `outputs` | #0: 62 CKB, lock `args` `0x3174935d…c809`. #1: 99,937.99999536 CKB, lock `args` `0x547b5c1c…f937` | #0 pays the recipient and #1 is the change back to me. Both use the default lock: `code_hash` `0x9bd7e06f…cce8`, `hash_type` `type`, `args` the 20-byte blake160 hash of the owner's public key. Neither has a type Script. 62 CKB is above the 61 CKB minimum for a cell with this lock and no data. |
+   | `inputs` | `0x4b9f5871…114a`, index 0; `since` `0x0` | The live cell being consumed (100,000 CKB), identified by its OutPoint. `since` 0 means no time lock. |
+   | `outputs` | #0: 62 CKB, lock `args` `0x3174935d…c809`. #1: 99,937.99999536 CKB, lock `args` `0x547b5c1c…f937` | #0 pays the recipient and #1 is the change back to the sender. Both use the default lock: `code_hash` `0x9bd7e06f…cce8`, `hash_type` `type`, `args` the 20-byte blake160 hash of the owner's public key. Neither has a type Script. 62 CKB is above the 61 CKB minimum for a cell with this lock and no data. |
    | `outputs_data` | `["0x", "0x"]` | Neither output stores data; the entries match the outputs by index. |
    | `witnesses` | 1 witness of 85 bytes | A `WitnessArgs` whose `lock` field holds the 65-byte signature (16-byte header + 4-byte length + 65 bytes). The lock Script checks it against the `args` of the input's lock. |
 
@@ -49,7 +70,7 @@
 
 | # | Step | Command / action | Result | Evidence |
 |---|------|------------------|--------|----------|
-| 1 | Download and start the light client | `gh release download v0.5.4 -R nervosnetwork/ckb-light-client -p 'ckb-light-client_v0.5.4-x86_64-linux-portable.tar.gz'`, then `./ckb-light-client run --config-file ./config/testnet.toml`. The default `x86_64-linux` build failed with `GLIBC_2.38 not found` on this machine (glibc 2.35), so I used the `-portable` build | Light client `0.5.4` (git `778590a`, built 2026-01-02) started on testnet. It listens on `/ip4/0.0.0.0/tcp/8118`, connected to 4 peers within 3 seconds (`SessionId(1)` to `SessionId(4)`), then logged `prove_or_download-matched blocks` every 3 seconds. | [light-client-run.png](imgs/light-client-run.png) |
+| 1 | Download and start the light client | `gh release download v0.5.4 -R nervosnetwork/ckb-light-client -p 'ckb-light-client_v0.5.4-x86_64-linux-portable.tar.gz'`, then `./ckb-light-client run --config-file ./config/testnet.toml` | Light client `0.5.4` (git `778590a`, built 2026-01-02) started on testnet. It listens on `/ip4/0.0.0.0/tcp/8118`, connected to 4 peers within 3 seconds (`SessionId(1)` to `SessionId(4)`), then logged `prove_or_download-matched blocks` every 3 seconds. | [light-client-run.png](imgs/light-client-run.png) |
 | 2 | Light client is synced | `curl -s http://127.0.0.1:9000/ -X POST -H "Content-Type: application/json" -d '{"jsonrpc":"2.0","method":"get_tip_header","params":[],"id":1}' \| jq` | `get_tip_header` returned block `0x15fd519` (23,057,689), hash `0x22dcc8d8…c1ad86`. The public RPC in #3 reported `0x15fd50a` (23,057,674) about two minutes earlier, so the light client is within 15 blocks of the network tip. | [light-client-tip.png](imgs/light-client-tip.png) |
 | 3 | RPC: tip block number | `curl -s -H 'content-type: application/json' -d '{"id":1,"jsonrpc":"2.0","method":"get_tip_block_number","params":[]}' https://testnet.ckb.dev/` | `{"jsonrpc":"2.0","result":"0x15fd50a","id":1}`: tip block 23,057,674. | [rpc-tip.png](imgs/rpc-tip.png) |
 | 4 | RPC: get a transaction | `get_transaction` with the Week 2 A2 tx hash (`0x08c579c0…6713a2`) on `https://testnet.ckb.dev/` | Returned the A2 transaction: `cycles` `0x16620e` (1,466,894, the same as the Explorer showed in Week 2); 1 input spending output 0 of `0x7d683800…bda9`; 1 output of `0x218711a00` (90 CKB) with lock `code_hash` `0xf329effd…52cb`; `outputs_data` is `0x`; 2 `cell_deps` (one `dep_group`, one `code`). | [rpc-get-transaction.png](imgs/rpc-get-transaction.png) |
