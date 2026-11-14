@@ -25,9 +25,6 @@
    - **Transports:** HTTP on `127.0.0.1:8114` by default (every call is a `POST`); TCP and WebSocket listeners are optional in `ckb.toml`.
    - **Modules:** methods are grouped into modules (`Chain`, `Pool`, `Net`, `Stats`, `Subscription`, …) that `ckb.toml` enables or disables.
    - **Encoding:** integers are `0x`-prefixed hex strings without leading zeros (`"0x0"`, not `0` or `"0x00"`); hashes are `0x`-prefixed 32-byte hex. Capacity is in shannons: `0x2540be400` = 100 CKB.
-   - **`get_transaction`:** `tx_status.status` is `pending`, `proposed`, `committed`, `unknown` or `rejected`. `transaction` is filled only for the first three.
-   - **`get_live_cell`:** takes an OutPoint and `with_data`; returns `status: "live"` for an unspent cell.
-   - **`send_transaction`:** asynchronous, so a returned hash does not mean the transaction is verified; poll `get_transaction`. Verification errors use CKB codes such as −302 `TransactionFailedToVerify`.
 
 5. **Fees.** Fee = `fee_rate × transaction size / 1000` (rate in shannons per kB) = total input capacity − total output capacity. The size used for the fee is 4 bytes more than the Explorer's Size field.
 
