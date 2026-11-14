@@ -17,15 +17,11 @@
    - A light client verifies the chain with limited resources: it downloads only a small sample of block headers, and a full block only when a filter says the block has data for the scripts registered with it. Its data stays small (about 10 MB on testnet).
    - Its RPC listens on `127.0.0.1:9000` and differs from a full node's RPC: it adds `set_scripts` / `get_scripts` to choose which scripts to track, and `fetch_header` / `fetch_transaction`.
 
-   Sources: [run a testnet node](https://docs.nervos.org/docs/node/run-testnet-node), [RFC 0044](https://github.com/nervosnetwork/rfcs/blob/master/rfcs/0044-ckb-light-client/0044-ckb-light-client.md), [RFC 0045](https://github.com/nervosnetwork/rfcs/blob/master/rfcs/0045-client-block-filter/0045-client-block-filter.md) and the [light client README](https://github.com/nervosnetwork/ckb-light-client).
-
 3. **JSON-RPC 2.0.** A stateless, lightweight remote-procedure-call protocol with JSON messages; the specification does not fix a transport.
    - **Request:** `jsonrpc` (exactly `"2.0"`), `method`, an optional `params` (an array or an object) and an `id`. A request without an `id` is a notification and gets no response.
    - **Response:** repeats the `id` and carries either `result` or `error`. An error has an integer `code`, a `message` and optional `data`. Reserved codes include −32700 Parse error, −32600 Invalid Request, −32601 Method not found and −32602 Invalid params.
    - **Batch:** an array of requests; the responses come back as an array, in any order, and are matched to the requests by `id`.
    - **Example:** `{"jsonrpc":"2.0","method":"get_tip_block_number","params":[],"id":1}` is answered by `{"jsonrpc":"2.0","result":"0x15fd50a","id":1}`.
-
-   Source: the [JSON-RPC 2.0 specification](https://www.jsonrpc.org/specification).
 
 4. **CKB JSON-RPC protocols.** CKB adds its own conventions on top of JSON-RPC 2.0:
    - **Transports.** By default the node serves HTTP on `127.0.0.1:8114`; it can also bind TCP and WebSocket listeners (`tcp_listen_address` and `ws_listen_address` in `ckb.toml`, commented out by default, with example ports 18114 and 28114). Over HTTP every call is a `POST` with a JSON body, and a `GET` is rejected. The light client's RPC listens on `127.0.0.1:9000`.
@@ -35,18 +31,9 @@
    - **`get_live_cell`.** It takes an OutPoint and a `with_data` boolean, and reports `status: "live"` for an unspent cell.
    - **`send_transaction`.** It is asynchronous, so a returned hash does not mean the transaction is verified; poll `get_transaction`. Verification failures use CKB's own error codes, for example −302 `TransactionFailedToVerify`.
 
-   Source: the [CKB RPC documentation](https://github.com/nervosnetwork/ckb/blob/develop/rpc/README.md) and the default [`ckb.toml`](https://github.com/nervosnetwork/ckb/blob/develop/resource/ckb.toml).
-
 5. **Fees: the rate matters, not the amount.**
    - A fee is `fee_rate × transaction size / 1000`, with the rate in shannons per kB. It also equals total input capacity minus total output capacity.
    - The size used for the fee is 4 bytes more than the Explorer's Size field (see item 6).
-   - Fees of the transactions in this report:
-
-   | Transaction | Fee | How it was set |
-   |---|---|---|
-   | A2 (Week 2, 410 bytes) | 10 CKB, about 2,415,458,937 shannons/kB | chosen by hand in the course |
-   | `ckb-cli wallet transfer` | 0.00000464 CKB, 1,000 shannons/kB | `--fee-rate`, default 1,000 shannons/kB |
-   | CCC `simple-transfer` | 0.00000465 CKB, 1,002 shannons/kB | `completeFeeBy(signer, 1000)` |
 
 6. **Reading a transaction on the Explorer.** Example: transaction `0x0843fa99d074eb6b161ba198dee551a038192ae8bde6abe15f246329a4e1c0fd` (Evidence #8). The first six rows are on its Explorer page (Evidence #9); the rest are under Parameters / Raw and come from `get_transaction`.
 
