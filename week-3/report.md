@@ -10,48 +10,40 @@
 
 ## Key learnings
 
-1. **Three networks, three separate states.** Devnet, testnet (Pudge) and mainnet share no balances. A devnet account has no CKB on testnet, so a testnet account must be funded with test CKB. The address prefix tells the network: `ckt1…` is testnet, `ckb1…` is mainnet.
+1. **Three networks, three separate states.** Devnet, testnet (Pudge) and mainnet share no balances. The address prefix tells the network: `ckt1…` is testnet, `ckb1…` is mainnet.
 
 2. **Full node vs. light client.**
-   - A full node downloads and verifies every block. The docs ask for at least 200 GB of free disk, and syncing from genesis may take up to several days.
-   - A light client verifies the chain with limited resources: it downloads only a small sample of block headers, and a full block only when a filter says the block has data for the scripts registered with it. Its data stays small (about 10 MB on testnet).
-   - Its RPC listens on `127.0.0.1:9000` and differs from a full node's RPC: it adds `set_scripts` / `get_scripts` to choose which scripts to track, and `fetch_header` / `fetch_transaction`.
+   - Full node: downloads and verifies every block; needs at least 200 GB of free disk, and syncing from genesis may take days.
+   - Light client: verifies the chain from a small sample of block headers, and downloads a full block only when a filter matches the scripts registered with it (about 10 MB of data on testnet). Its RPC (`127.0.0.1:9000`) adds `set_scripts` / `get_scripts`, `fetch_header` and `fetch_transaction`.
 
-3. **JSON-RPC 2.0.** A stateless, lightweight remote-procedure-call protocol with JSON messages; the specification does not fix a transport.
-   - **Request:** `jsonrpc` (exactly `"2.0"`), `method`, an optional `params` (an array or an object) and an `id`. A request without an `id` is a notification and gets no response.
-   - **Response:** repeats the `id` and carries either `result` or `error`. An error has an integer `code`, a `message` and optional `data`. Reserved codes include −32700 Parse error, −32600 Invalid Request, −32601 Method not found and −32602 Invalid params.
-   - **Batch:** an array of requests; the responses come back as an array, in any order, and are matched to the requests by `id`.
-   - **Example:** `{"jsonrpc":"2.0","method":"get_tip_block_number","params":[],"id":1}` is answered by `{"jsonrpc":"2.0","result":"0x15fd50a","id":1}`.
+3. **JSON-RPC 2.0.** A stateless protocol with JSON messages; the transport is not fixed.
+   - **Request:** `jsonrpc` (`"2.0"`), `method`, optional `params` (array or object) and `id`. No `id` means a notification with no response.
+   - **Response:** the same `id`, with either `result` or `error` (`code`, `message`, optional `data`). Reserved codes: −32700 Parse error, −32600 Invalid Request, −32601 Method not found, −32602 Invalid params.
+   - **Batch:** an array of requests; responses come back as an array in any order, matched by `id`.
 
-4. **CKB JSON-RPC protocols.** CKB adds its own conventions on top of JSON-RPC 2.0:
-   - **Transports.** By default the node serves HTTP on `127.0.0.1:8114`; it can also bind TCP and WebSocket listeners (`tcp_listen_address` and `ws_listen_address` in `ckb.toml`, commented out by default, with example ports 18114 and 28114). Over HTTP every call is a `POST` with a JSON body, and a `GET` is rejected. The light client's RPC listens on `127.0.0.1:9000`.
-   - **Modules.** Methods are grouped into modules (`Chain`, `Pool`, `Net`, `Stats`, `Subscription` and others) that `ckb.toml` switches on or off.
-   - **Encoding.** Integers are `0x`-prefixed hex strings without redundant leading zeros, so a cell index is `"0x0"`; a plain JSON number or `"0x00"` is rejected with error −32602. Hashes are `0x`-prefixed 32-byte hex strings. A capacity of `0x2540be400` is 100 CKB (10^8 shannons per CKB).
-   - **`get_transaction`.** It returns `tx_status.status`: `pending` or `proposed` (in the transaction pool), `committed` (in the chain), `unknown` (the node has not seen it) or `rejected` (recently removed from the pool). The `transaction` field holds the transaction only for `pending`, `proposed` and `committed`; otherwise it is `null`.
-   - **`get_live_cell`.** It takes an OutPoint and a `with_data` boolean, and reports `status: "live"` for an unspent cell.
-   - **`send_transaction`.** It is asynchronous, so a returned hash does not mean the transaction is verified; poll `get_transaction`. Verification failures use CKB's own error codes, for example −302 `TransactionFailedToVerify`.
+4. **CKB JSON-RPC conventions.**
+   - **Transports:** HTTP on `127.0.0.1:8114` by default (every call is a `POST`); TCP and WebSocket listeners are optional in `ckb.toml`.
+   - **Modules:** methods are grouped into modules (`Chain`, `Pool`, `Net`, `Stats`, `Subscription`, …) that `ckb.toml` enables or disables.
+   - **Encoding:** integers are `0x`-prefixed hex strings without leading zeros (`"0x0"`, not `0` or `"0x00"`); hashes are `0x`-prefixed 32-byte hex. Capacity is in shannons: `0x2540be400` = 100 CKB.
+   - **`get_transaction`:** `tx_status.status` is `pending`, `proposed`, `committed`, `unknown` or `rejected`. `transaction` is filled only for the first three.
+   - **`get_live_cell`:** takes an OutPoint and `with_data`; returns `status: "live"` for an unspent cell.
+   - **`send_transaction`:** asynchronous, so a returned hash does not mean the transaction is verified; poll `get_transaction`. Verification errors use CKB codes such as −302 `TransactionFailedToVerify`.
 
-5. **Fees: the rate matters, not the amount.**
-   - A fee is `fee_rate × transaction size / 1000`, with the rate in shannons per kB. It also equals total input capacity minus total output capacity.
-   - The size used for the fee is 4 bytes more than the Explorer's Size field (see item 6).
+5. **Fees.** Fee = `fee_rate × transaction size / 1000` (rate in shannons per kB) = total input capacity − total output capacity. The size used for the fee is 4 bytes more than the Explorer's Size field.
 
-6. **Reading a transaction on the Explorer.** Example: transaction `0x0843fa99d074eb6b161ba198dee551a038192ae8bde6abe15f246329a4e1c0fd` (Evidence #8). The first six rows are on its Explorer page (Evidence #9); the rest are under Parameters / Raw and come from `get_transaction`.
+6. **Reading a transaction on the Explorer.**
 
-   | Field | Value | What it means |
-   |---|---|---|
-   | Block Height | 23,057,801 | The block that included the transaction. |
-   | Timestamp | 2026/11/14 10:44:59 | The timestamp of that block, in local time. A transaction has no timestamp of its own. |
-   | Status | 6 Confirmations | How many blocks have been built on the chain since the transaction was included, as counted by the Explorer. `get_transaction` reports `committed`. |
-   | Size | 460 bytes | Serialized size of the whole transaction, witness included. |
-   | Transaction Fee / Fee Rate | 0.00000464 CKB / 1,000 shannons/kB | Fee = total input − total output = 100,000 − 62 − 99,937.99999536 CKB (464 shannons). Fee rate = fee ÷ size; it gives 1,000 shannons/kB only with a size 4 bytes larger than the displayed 460 bytes. |
-   | Cycles | 1,645,579 | The CKB-VM execution cost of the Scripts the transaction runs; here the lock Script verifying one secp256k1 signature. |
-   | `version` | `0x0` | Transaction version. |
-   | `cell_deps` | one `dep_group`: `0xf8de3bb4…5d37`, index 0 | Where the node finds the Script code. This dep group holds the `secp256k1_blake160_sighash_all` code. |
-   | `header_deps` | empty | No block header is needed. |
-   | `inputs` | `0x4b9f5871…114a`, index 0; `since` `0x0` | The live cell being consumed (100,000 CKB), identified by its OutPoint. `since` 0 means no time lock. |
-   | `outputs` | #0: 62 CKB, lock `args` `0x3174935d…c809`. #1: 99,937.99999536 CKB, lock `args` `0x547b5c1c…f937` | #0 pays the recipient and #1 is the change back to the sender. Both use the default lock: `code_hash` `0x9bd7e06f…cce8`, `hash_type` `type`, `args` the 20-byte blake160 hash of the owner's public key. Neither has a type Script. 62 CKB is above the 61 CKB minimum for a cell with this lock and no data. |
-   | `outputs_data` | `["0x", "0x"]` | Neither output stores data; the entries match the outputs by index. |
-   | `witnesses` | 1 witness of 85 bytes | A `WitnessArgs` whose `lock` field holds the 65-byte signature (16-byte header + 4-byte length + 65 bytes). The lock Script checks it against the `args` of the input's lock. |
+   | Field | Meaning |
+   |---|---|
+   | Block Height / Timestamp | The block that included the transaction and that block's timestamp; a transaction has no timestamp of its own. |
+   | Status | Confirmations: blocks built on the chain since inclusion (`committed` in `get_transaction`). |
+   | Size | Serialized size of the whole transaction, witnesses included. |
+   | Fee / Fee Rate | Fee = total input − total output; rate = fee ÷ size (see item 5). |
+   | Cycles | CKB-VM execution cost of the Scripts the transaction runs. |
+   | `cell_deps` | Where the node finds Script code; the default lock uses a `dep_group`. |
+   | `inputs` | Consumed live cells, identified by OutPoint; `since` `0x0` means no time lock. |
+   | `outputs` / `outputs_data` | New cells and their data, matched by index. One output pays the recipient; another returns the change to the sender. |
+   | `witnesses` | `WitnessArgs`; its `lock` field holds the 65-byte secp256k1 signature (85 bytes in total), checked against the `args` of the input's lock. |
 
 ## Evidence
 
