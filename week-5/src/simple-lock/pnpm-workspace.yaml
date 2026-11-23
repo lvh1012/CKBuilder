@@ -1,0 +1,6 @@
+packages:
+  - "frontend"
+allowBuilds:
+  esbuild: true
+  secp256k1: false
+  unrs-resolver: true
