@@ -69,8 +69,6 @@ Participants must:
 
 * Act professionally and in good faith.
 
-* Ensure originality—avoid AI-generated or plagiarised content.
-
 ### **2.2 Track Activity**
 
 * Maintain timely communication on progress and blockers.
