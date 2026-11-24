@@ -10,26 +10,28 @@ Thời gian ước tính: Phần A (Rust) ~40 phút, Phần B (tutorial #5) ~30 
 
 ## Danh sách ảnh
 
+> **Cập nhật 2026-11-24.** `report.md` hiện chỉ giữ 12 dòng Evidence có ảnh. Các dòng cho ảnh chưa chụp (workspace, preimage sai, `pnpm test`, Academy A4/A5) đã bị xóa; cột "Dòng Evidence" dưới đây dùng số dòng mới (— nghĩa là hiện chưa có dòng nào). Nếu chụp thêm ảnh, thêm một dòng mới ở cuối bảng Evidence.
+
 | Ảnh | File (trong `week-5/imgs/`) | Bước | Dòng Evidence | Chụp gì |
 |---|---|---|---|---|
 | 1 | `tools-versions.png` | A1 | #1 | Version các công cụ |
-| 2 | `rust-generate-workspace.png` | A2 | #2 | `cargo generate` tạo workspace |
-| 3 | `rust-hello-build.png` | A3 | #3 | Sinh contract và `make build` |
-| 4 | `rust-hello-run.png` | A4 | #4 | Chạy Hello World bằng debugger và test |
-| 5 | `rust-lock-build.png` | A5 | #5 | Build `simple-lock` (Rust) |
-| 6 | `rust-lock-tests.png` | A6 | #6 | 9 test pass |
-| 7 | `rust-lock-debugger.png` | A7 | #7 | Phát lại giao dịch lỗi bằng `ckb-debugger` |
-| 8 | `js-build.png` | B1 | #8 | Build contract TypeScript |
-| 9 | `js-deploy.png` | B2 | #9 | Deploy lên devnet |
-| 10 | `js-ui-ready.png` | B3 | #10 | Frontend: deployment READY + địa chỉ hash lock |
-| 11 | `js-deposit.png` | B4 | #11 | `offckb deposit` |
-| 12 | `js-ui-funded.png` | B4 | #11 | UI hiện 300 CKB |
-| 13 | `js-ui-wrong.png` | B5 | #12 | Preimage sai → lỗi 11 |
-| 14 | `js-ui-unlock.png` | B6 | #13 | Preimage đúng → committed |
-| 15 | `js-rpc-unlock-tx.png` | B7 | #14 | `get_transaction` của giao dịch unlock |
-| 16 | `js-tests.png` | B8 | #15 | `pnpm test` |
-| 17 | `academy-a4.png` | C | #16 | Tiến độ Academy A4 |
-| 18 | `academy-a5.png` | C | #17 | Tiến độ Academy A5 |
+| 2 | `rust-generate-workspace.png` | A2 | — | `cargo generate` tạo workspace |
+| 3 | `rust-hello-build.png` | A3 | #2 | Sinh contract và `make build` |
+| 4 | `rust-hello-run.png` | A4 | #3 | Chạy Hello World bằng debugger và test |
+| 5 | `rust-lock-build.png` | A5 | #4 | Build `simple-lock` (Rust) |
+| 6 | `rust-lock-tests.png` | A6 | #5 | 9 test pass |
+| 7 | `rust-lock-debugger.png` | A7 | #6 | Phát lại giao dịch lỗi bằng `ckb-debugger` |
+| 8 | `js-build.png` | B1 | #7 | Build contract TypeScript |
+| 9 | `js-deploy.png` | B2 | #8 | Deploy lên devnet |
+| 10 | `js-ui-ready.png` | B3 | #9 | Frontend: deployment READY + địa chỉ hash lock |
+| 11 | `js-deposit.png` | B4 | #10 | `offckb deposit` |
+| 12 | `js-ui-funded.png` | B4 | #10 | UI hiện 300 CKB |
+| 13 | `js-ui-wrong.png` | B5 | — | Preimage sai → lỗi 11 |
+| 14 | `js-ui-unlock.png` | B6 | #11 | Preimage đúng → committed |
+| 15 | `js-rpc-unlock-tx.png` | B7 | #12 | `get_transaction` của giao dịch unlock |
+| 16 | `js-tests.png` | B8 | — | `pnpm test` |
+| 17 | `academy-a4.png` | C | — | Tiến độ Academy A4 |
+| 18 | `academy-a5.png` | C | — | Tiến độ Academy A5 |
 
 ## 0. Chuẩn bị chung
 
@@ -216,7 +218,7 @@ T3:
 pnpm run deploy -- --network devnet
 ```
 
-Lệnh hỏi `Are you sure you want to deploy these contracts? (Y/n)`: gõ `Y` + Enter (phải chạy trong terminal thật, không qua pipe). Ảnh phải thấy: `tx committed.`, `Deployment completed successfully!`, `Contract OutPoint: 0x…:0`, `ckb-js-vm OutPoint: 0x…:15`. **Ghi lại hai OutPoint vào báo cáo** (thay `TODO` ở dòng #9).
+Lệnh hỏi `Are you sure you want to deploy these contracts? (Y/n)`: gõ `Y` + Enter (phải chạy trong terminal thật, không qua pipe). Ảnh phải thấy: `tx committed.`, `Deployment completed successfully!`, `Contract OutPoint: 0x…:0`, `ckb-js-vm OutPoint: 0x…:15`. **Ghi lại hai OutPoint vào báo cáo** (dòng #8 trong báo cáo).
 
 `git status` sau đó sẽ hiện `deployment/scripts.json`, `frontend/deployment/*.json` đổi và một file mới trong `deployment/devnet/hash-lock.bc/migrations/`; đây là hồ sơ deploy của bạn, giữ lại để commit.
 
@@ -235,7 +237,7 @@ Mở http://localhost:3000 (nếu đã mở trước khi deploy, tải lại tra
 - blake2b-256: `0x106911e4f83e790e1eb2f39bdff23c1db43ed5af9219f763e571389af21259ca`.
 - Hash-lock address (`ckt1q…`) và khối Lock script (`hashType` `type`, `args` bắt đầu bằng `0x0000cd262cb3…` rồi `04…`, rồi `106911e4…`).
 
-Chép địa chỉ hash-lock vào báo cáo (dòng #10). Nếu trạng thái không phải READY: bấm "Check again"; nếu vẫn lỗi, deploy lại (B2) và khởi động lại `pnpm dev`.
+Chép địa chỉ hash-lock vào báo cáo (dòng #9). Nếu trạng thái không phải READY: bấm "Check again"; nếu vẫn lỗi, deploy lại (B2) và khởi động lại `pnpm dev`.
 
 ### B4. Nạp tiền → `js-deposit.png` và `js-ui-funded.png`
 
@@ -245,7 +247,7 @@ T3 (thay `<ADDRESS>` bằng địa chỉ hash-lock đã chép):
 offckb deposit --network devnet <ADDRESS> 300
 ```
 
-Ảnh `js-deposit.png`: lệnh và dòng `tx hash:  0x…`. **Ghi tx hash vào báo cáo** (dòng #11).
+Ảnh `js-deposit.png`: lệnh và dòng `tx hash:  0x…`. **Ghi tx hash vào báo cáo** (dòng #10).
 
 Chờ giao dịch committed (thường 10–20 giây):
 
@@ -256,15 +258,17 @@ curl -s -X POST -H 'content-type: application/json' \
   http://127.0.0.1:8114 | jq -r '.result.tx_status.status'
 ```
 
-Khi in `committed`, bấm **Refresh committed balance** trong UI. Ảnh `js-ui-funded.png`: "Total live capacity" là `300 CKB`, và vẫn thấy địa chỉ.
+Khi in `committed`, bấm **Refresh committed balance** trong UI. Ảnh `js-ui-funded.png`: "Total live capacity" tăng thêm 300 CKB, và vẫn thấy địa chỉ.
+
+> **Số dư thực tế của bạn là 500,99999506 CKB, không phải 300.** Cùng preimage `Hello World` luôn cho cùng một địa chỉ, và devnet giữ trạng thái giữa các lần chạy, nên địa chỉ này còn 200,99999506 CKB tiền thối từ lần chạy thử của Claude (cũng là lý do giao dịch unlock ở B7 có 2 input). Báo cáo đã ghi đúng theo ảnh của bạn.
 
 ### B5. Preimage sai → `js-ui-wrong.png`
 
-Ở mục "Preimage to reveal" nhập `wrong secret`, bấm **Transfer CKB**. Ảnh phải thấy: `Transaction status: failed` và dòng "The preimage does not match this hash lock (error 11). The transaction was rejected atomically and the original cells remain live." Sau đó bấm Refresh để chắc chắn số dư vẫn 300 CKB (có thể chụp thêm nhưng không bắt buộc).
+Ở mục "Preimage to reveal" nhập `wrong secret`, bấm **Transfer CKB**. Ảnh phải thấy: `Transaction status: failed` và dòng "The preimage does not match this hash lock (error 11). The transaction was rejected atomically and the original cells remain live." Sau đó bấm Refresh để chắc chắn số dư không đổi (xem Phần E về số dư hiện tại).
 
 ### B6. Preimage đúng → `js-ui-unlock.png`
 
-Nhập lại `Hello World` ở "Preimage to reveal", giữ Amount mặc định 99, bấm **Transfer CKB**. Trạng thái chuyển `pending` rồi `committed` (cần vài giây). Ảnh phải thấy `Transaction status: committed` và `Transaction hash: 0x…`. **Ghi tx hash vào báo cáo** (dòng #13).
+Nhập lại `Hello World` ở "Preimage to reveal", giữ Amount mặc định 99, bấm **Transfer CKB**. Trạng thái chuyển `pending` rồi `committed` (cần vài giây). Ảnh phải thấy `Transaction status: committed` và `Transaction hash: 0x…`. **Ghi tx hash vào báo cáo** (dòng #11).
 
 ### B7. Xem giao dịch unlock bằng RPC → `js-rpc-unlock-tx.png`
 
@@ -285,7 +289,7 @@ Kỳ vọng (từ lần chạy thử; của bạn có thể lệch chút):
 - `cell_deps`: hai mục (bytecode `hash-lock.bc` và ckb-js-vm, index `0xf`).
 - `witnesses[0]` kết thúc bằng `…48656c6c6f20576f726c64`; lệnh `python3` in ra `Hello World`: preimage nằm công khai trong witness.
 
-Tính phí để điền báo cáo: `300 − 99 − 200,99999506 = 0,00000494 CKB` (494 shannon). Nếu số của bạn khác, sửa dòng #14.
+Tính phí để điền báo cáo: `300 − 99 − 200,99999506 = 0,00000494 CKB` (494 shannon). Nếu số của bạn khác, sửa dòng #12.
 
 ### B8. Test của tutorial → `js-tests.png`
 
@@ -307,7 +311,7 @@ Phần này Claude không làm hộ được (cần tài khoản Academy của b
 2. **A4 — L1 Developer Training Course.** Theo giáo trình tuần 5, học các bài về Cell Model và giao dịch. Nội dung tương ứng trên bản [gitbook](https://nervos.gitbook.io/developer-training-course/lab-exercise-setup): *Transactions* (Transaction Lifecycle…) và *Scripting Basics* (Introduction to Scripting Part 1–2, Validating a Transaction, Syscalls and Sources, Script Groups, Using Script Args). Bỏ qua phần lab dùng Lumos/Capsule (Handbook cho phép).
 3. **A5 — CKB Script Programming Series.** Nội dung trùng Class 1–2 của Script course (Intro to Script, Program Languages for Script).
 4. Chụp trang khóa học cho thấy: tên khóa học, các bài đã hoàn thành hoặc phần trăm tiến độ, và điểm nếu Academy hiển thị. Lưu thành `academy-a4.png` và `academy-a5.png`.
-5. Điền dòng #16 và #17 trong báo cáo, cùng hai mục `TODO(A4 progress)` và `TODO(A5 progress)` ở phần Completed. Nếu bạn mới học một phần, ghi đúng phần đã xong (A4 và A5 kéo dài tuần 5–7).
+5. Báo cáo hiện không có mục Academy (cả phần Completed lẫn Evidence); nếu muốn đưa vào, thêm một mục `- Academy:` vào Completed và hai dòng mới ở cuối bảng Evidence. Nếu bạn mới học một phần, ghi đúng phần đã xong (A4 và A5 kéo dài tuần 5–7).
 
 ---
 
@@ -327,12 +331,10 @@ Không được còn `MISSING`. Mọi `TODO(...)` phải được thay bằng gi
 
 | Vị trí | Giá trị cần điền | Lấy ở |
 |---|---|---|
-| Completed, A4 và A5 | Tiến độ/điểm Academy | Phần C |
-| Evidence #9 | `Contract OutPoint`, `ckb-js-vm OutPoint` | B2 |
-| Evidence #10 | Địa chỉ hash-lock `ckt1…` | B3 |
-| Evidence #11 | Tx hash của lần nạp tiền | B4 |
-| Evidence #13 | Tx hash của lần unlock | B6 |
-| Evidence #16, #17 | Kết quả Academy | Phần C |
+| Evidence #8 | `Contract OutPoint`, `ckb-js-vm OutPoint` | B2 |
+| Evidence #9 | Địa chỉ hash-lock `ckt1…` | B3 |
+| Evidence #10 | Tx hash của lần nạp tiền | B4 |
+| Evidence #11 | Tx hash của lần unlock | B6 |
 
 ### D2. Đối chiếu và viết ý kiến riêng
 
@@ -352,6 +354,43 @@ git status --short | grep -E "\.privkey|\.env$" && echo "CHÚ Ý: có file bí m
 ```
 
 `target/`, `build/`, `node_modules/`, `dist/`, `tests/failed_txs/` đã được `.gitignore` bỏ qua. Hai file `docs/CKB Builder Handbook.md` và `docs/CKBuilder T&Cs.md` đang có thay đổi chưa commit từ trước (không thuộc bước này); đừng `git add` chúng nếu không chủ ý.
+
+---
+
+## Phần E — Chụp bổ sung (sau khi xem 13 ảnh đầu)
+
+13 ảnh đầu đã được đối chiếu và điền vào `report.md`; các dòng Evidence của những ảnh chưa chụp đã bị xóa khỏi báo cáo. Còn lại:
+
+| Ảnh | Tình trạng | Cách chụp |
+|---|---|---|
+| `rust-generate-workspace.png` | Chưa có | Làm A2 (thư mục tạm `~/ckb-demo`, mất ~1 phút). Dòng Evidence tương ứng đã bị xóa khỏi báo cáo; nếu chụp, thêm lại một dòng mới. |
+| `rust-lock-debugger.png` | Có ảnh nhưng **thiếu kết quả của `ckb-debugger`**: ảnh bị cắt ở phần log `make test` | Chụp lại với lệnh lọc cho gọn (xem bên dưới). |
+| `js-ui-wrong.png` | Chưa có | Xem bên dưới. |
+| `js-tests.png` | Chưa có | Làm B8 (`pnpm test`; không cần devnet). |
+| `academy-a4.png`, `academy-a5.png` | Chưa có | Làm Phần C. |
+
+**Chụp lại `rust-lock-debugger.png`** (T1 trong `week-5/src/ckb-rust-script`, đã `export` biến ở mục 0.3):
+
+```bash
+rm -rf tests/failed_txs
+make test CARGO_ARGS="-- test_wrong_preimage_is_rejected --nocapture" 2>&1 | grep -E "contract debug|Failed tx|^test "
+ckb-debugger -f "$(ls -t tests/failed_txs/*.json | head -1)" -i 0 -t input -s lock
+```
+
+Ảnh phải thấy: dòng `Failed tx written to …`, rồi `Script log: simple-lock rejected the transaction: HashMismatch (11)`, `Run result: 11`, `All cycles: 35957(35.1K)`. Sau khi chụp, cập nhật dòng #6 trong báo cáo: thêm kết quả `Run result: 11`, `All cycles: 35957(35.1K)` và đổi `0xa59c0f36….json` theo tên file trong ảnh mới.
+
+**Chụp `js-ui-wrong.png`** (cần chạy lại devnet và frontend):
+
+```bash
+# T2
+offckb node
+# T4
+cd ~/Documents/CKBuilder/week-5/src/simple-lock/frontend && pnpm dev
+```
+
+Mở http://localhost:3000 (preimage vẫn `Hello World`, cùng địa chỉ cũ). "Total live capacity" lúc này là **401,99998968 CKB** (tiền thối của giao dịch unlock ở B6). Nhập `wrong secret` vào "Preimage to reveal", bấm **Transfer CKB**. Ảnh phải thấy `Transaction status: failed` và dòng "The preimage does not match this hash lock (error 11)…". Bấm Refresh để thấy số dư vẫn 401,99998968 CKB rồi cập nhật dòng #12 (đã ghi "Capacity stays unchanged"; thêm con số này nếu muốn). Xong thì `Ctrl+C` hai terminal, và kiểm tra `pgrep -af "bins/.*/ckb"`.
+
+**Không bắt buộc:** `js-ui-ready.png` hiện có dòng nổi "To exit full screen, press and hold Esc" của trình duyệt che tiêu đề. Nếu muốn ảnh sạch, thoát toàn màn hình rồi chụp lại; số dư lúc đó là 401,99998968 CKB nên báo cáo (dòng #9) sẽ cần sửa theo.
 
 ---
 
