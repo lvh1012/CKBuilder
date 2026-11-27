@@ -1,24 +1,17 @@
 # Week 5 — 2026-11-29
 
-<!--
-DRAFT. Before publishing:
-1. Follow runbook.md and take every screenshot into imgs/ (file names are the ones linked in the Evidence table).
-2. Replace each TODO(...) with your own value or text, and check every other number against your own screenshot (the numbers here come from a dry run on the same machine).
-3. Add your own takeaways at the end of "Key learnings", then delete this comment.
--->
-
 ## Completed
 
 - Docs:
   - [Intro to Script](https://docs.nervos.org/docs/script/intro-to-script)
-  - Script course [Class 1: Validation Model](https://docs.nervos.org/docs/script-course/intro-to-script-1) and [Class 2: Script Basics](https://docs.nervos.org/docs/script-course/intro-to-script-2) (docs.nervos.org now redirects them to Intro to Script and [Program Languages for Script](https://docs.nervos.org/docs/script/program-language-for-script))
-  - [Rust Script Quick Start](https://docs.nervos.org/docs/script/rust/rust-quick-start), with its sub-pages [Entry & Allocator](https://docs.nervos.org/docs/script/rust/rust-api-entry), [Syscalls](https://docs.nervos.org/docs/script/rust/rust-api-syscalls), [Test](https://docs.nervos.org/docs/script/rust/rust-test), [Build](https://docs.nervos.org/docs/script/rust/rust-build), [Example: Simple Lock](https://docs.nervos.org/docs/script/rust/rust-example-simple-lock)
-  - Reference: [Script Group Execution](https://docs.nervos.org/docs/tech-explanation/script-group-exe), [Data Hash vs. Type Hash](https://docs.nervos.org/docs/tech-explanation/data-type-diff), [Cycle Limits](https://docs.nervos.org/docs/script/vm-cycle-limits), [Common Error Codes](https://docs.nervos.org/docs/script/common-script-error-code)
+  - [Program Languages for Script](https://docs.nervos.org/docs/script/program-language-for-script)
+  - [Rust Script Quick Start](https://docs.nervos.org/docs/script/rust/rust-quick-start)
 - Academy:
-  - A4 [L1 Developer Training Course](https://nervos.gitbook.io/developer-training-course/lab-exercise-setup): Transactions (Transaction Lifecycle) and Scripting Basics (Introduction to Scripting 1–2, Validating a Transaction, Syscalls and Sources, Script Groups, Using Script Args); I skipped the labs, which use Lumos and Capsule. TODO(A4 progress)
-  - A5 CKB Script Programming Series: same content as Class 1–2 above. TODO(A5 progress)
-- Tutorial #5: [Build a Simple Lock](https://docs.nervos.org/docs/dapp/simple-lock), the [simple-lock](src/simple-lock/) example (a JavaScript hash lock on ckb-js-vm) on **devnet**
-- Code: [ckb-rust-script](src/ckb-rust-script/), a workspace from [ckb-script-templates](https://github.com/cryptape/ckb-script-templates) with two contracts: `hello-world`, and `simple-lock`, the same hash lock written in Rust with 8 tests
+  - A4 [L1 Developer Training Course](https://nervos.gitbook.io/developer-training-course/lab-exercise-setup)
+  - A5 CKB Script Programming Series
+- Code:
+   - [simple-lock](src/simple-lock/) example (a JavaScript hash lock on ckb-js-vm) on **devnet**
+   - [ckb-rust-script](src/ckb-rust-script/), a workspace from [ckb-script-templates](https://github.com/cryptape/ckb-script-templates) with two contracts: `hello-world`, and `simple-lock`
 
 ## Key learnings
 
