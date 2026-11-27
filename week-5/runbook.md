@@ -6,7 +6,7 @@ Thời gian ước tính: Phần A (Rust) ~40 phút, Phần B (tutorial #5) ~30 
 
 > **Về nguồn gốc các con số.** Số liệu trong `report.md` (cycles, kích thước file, mã lỗi…) lấy từ một lần chạy thử trên chính máy này. Khi chạy lại, hãy đối chiếu từng con số với ảnh của bạn; nếu khác, **sửa báo cáo theo ảnh của bạn**. Chỉ các giá trị đặc thù từng lần chạy (tx hash, OutPoint, địa chỉ) được để `TODO(...)`.
 >
-> **Về code.** `src/ckb-rust-script/contracts/simple-lock` và `tests/src/test_simple_lock.rs` do Claude soạn dựa trên tài liệu "Example: Simple Lock". Hãy đọc từng dòng, chạy lại và sửa theo ý bạn trước khi nộp.
+> **Về code.** `src/ckb-rust-script/contracts/simple-lock` và `tests/src/test_simple_lock.rs` được viết dựa trên tài liệu "Example: Simple Lock". Hãy đọc từng dòng, chạy lại và sửa theo ý bạn trước khi nộp.
 
 ## Danh sách ảnh
 
@@ -71,7 +71,7 @@ Cách "chuẩn" thay thế (cần `sudo`): cài clang 18+ theo `apt.llvm.org` r�
 
 ### 0.4 Công cụ đã cài sẵn
 
-Khi soạn bản nháp này, Claude đã cài trên máy bạn: `cargo-generate` (`cargo install cargo-generate`), target `riscv64imac-unknown-none-elf` (`rustup target add …`) và `ckb-debugger` 1.1.2 (`offckb install ckb-debugger`, tạo shim trong `~/.nvm/versions/node/v26.13.0/bin/`). Nếu thiếu, cài lại bằng đúng các lệnh đó. `cargo install ckb-debugger` sẽ lỗi vì máy chưa có `protoc`; đó là lý do dùng `offckb install`.
+Các công cụ sau đã được cài sẵn trên máy: `cargo-generate` (`cargo install cargo-generate`), target `riscv64imac-unknown-none-elf` (`rustup target add …`) và `ckb-debugger` 1.1.2 (`offckb install ckb-debugger`, tạo shim trong `~/.nvm/versions/node/v26.13.0/bin/`). Nếu thiếu, cài lại bằng đúng các lệnh đó. `cargo install ckb-debugger` sẽ lỗi vì máy chưa có `protoc`; đó là lý do dùng `offckb install`.
 
 ### 0.5 Bố trí terminal
 
@@ -260,7 +260,7 @@ curl -s -X POST -H 'content-type: application/json' \
 
 Khi in `committed`, bấm **Refresh committed balance** trong UI. Ảnh `js-ui-funded.png`: "Total live capacity" tăng thêm 300 CKB, và vẫn thấy địa chỉ.
 
-> **Số dư thực tế của bạn là 500,99999506 CKB, không phải 300.** Cùng preimage `Hello World` luôn cho cùng một địa chỉ, và devnet giữ trạng thái giữa các lần chạy, nên địa chỉ này còn 200,99999506 CKB tiền thối từ lần chạy thử của Claude (cũng là lý do giao dịch unlock ở B7 có 2 input). Báo cáo đã ghi đúng theo ảnh của bạn.
+> **Số dư thực tế của bạn là 500,99999506 CKB, không phải 300.** Cùng preimage `Hello World` luôn cho cùng một địa chỉ, và devnet giữ trạng thái giữa các lần chạy, nên địa chỉ này còn 200,99999506 CKB tiền thối từ lần chạy thử trước (cũng là lý do giao dịch unlock ở B7 có 2 input). Báo cáo đã ghi đúng theo ảnh của bạn.
 
 ### B5. Preimage sai → `js-ui-wrong.png`
 
@@ -305,7 +305,7 @@ Xong Phần B: `Ctrl+C` ở T4 (frontend) và T2 (`offckb node`). Kiểm tra kh�
 
 ## Phần C — Academy A4, A5 (ảnh `academy-a4.png`, `academy-a5.png`)
 
-Phần này Claude không làm hộ được (cần tài khoản Academy của bạn), và cũng chưa xem được giao diện Academy (trang web cần JavaScript và đăng nhập), nên các bước dưới đây là hướng dẫn chung:
+Phần này cần tài khoản Academy của bạn; giao diện Academy là trang cần JavaScript và đăng nhập nên các bước dưới đây chỉ là hướng dẫn chung:
 
 1. Vào https://academy.ckb.dev/courses, đăng nhập.
 2. **A4 — L1 Developer Training Course.** Theo giáo trình tuần 5, học các bài về Cell Model và giao dịch. Nội dung tương ứng trên bản [gitbook](https://nervos.gitbook.io/developer-training-course/lab-exercise-setup): *Transactions* (Transaction Lifecycle…) và *Scripting Basics* (Introduction to Scripting Part 1–2, Validating a Transaction, Syscalls and Sources, Script Groups, Using Script Args). Bỏ qua phần lab dùng Lumos/Capsule (Handbook cho phép).
