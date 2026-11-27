@@ -6,9 +6,8 @@
   - [Intro to Script](https://docs.nervos.org/docs/script/intro-to-script)
   - [Program Languages for Script](https://docs.nervos.org/docs/script/program-language-for-script)
   - [Rust Script Quick Start](https://docs.nervos.org/docs/script/rust/rust-quick-start)
-- Code:
-  - [simple-lock](src/simple-lock/) example (a JavaScript hash lock on ckb-js-vm) on **devnet**
-  - [ckb-rust-script](src/ckb-rust-script/), a workspace from [ckb-script-templates](https://github.com/cryptape/ckb-script-templates) with two contracts: `hello-world`, and `simple-lock`
+- Tutorial #5: [Build a Simple Lock](https://docs.nervos.org/docs/dapp/simple-lock), the [simple-lock](src/simple-lock/) example (a JavaScript hash lock on ckb-js-vm) on **devnet**
+- Code: [ckb-rust-script](src/ckb-rust-script/), a workspace from [ckb-script-templates](https://github.com/cryptape/ckb-script-templates) with two contracts: `hello-world`, and `simple-lock`, the same hash lock written in Rust, with 8 tests
 
 ## Key learnings
 
@@ -45,7 +44,7 @@
 
 9. **Cycles.**
    - Cost: 1 per instruction, 3 branch, 5 multiply, 32 divide, 500 + 0.25/byte syscall, 0.25/byte binary loaded. Limit: `max_block_cycles` = 3.5 billion (mainnet).
-   - Hello World 7,182. Rust hash lock 33,572. JS hash lock 13,086,867 (mock) / 13,084,116 (devnet) ≈ **390×** Rust (QuickJS is interpreted in CKB-VM).
+   - Hello World 7,182. Rust hash lock 33,572. JS hash lock 13,084,116 (devnet) ≈ **390×** Rust (QuickJS is interpreted in CKB-VM).
    - JavaScript for learning/prototype, Rust for production.
 
 10. **A hash lock proves knowledge of a secret, not ownership.** The preimage is public in `witness.lock` once sent (I decoded `Hello World` on devnet). Anyone can copy it into a competing transaction, so it is unsafe after first use. Use CKB's Blake2b: `ckb-hash` with `default-features = false, features = ["ckb-contract"]`.
