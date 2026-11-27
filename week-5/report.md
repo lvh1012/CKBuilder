@@ -48,15 +48,6 @@
 
 11. **JavaScript lock layout and capacity.** With ckb-js-vm the lock Script is the interpreter (`code_hash`, `hash_type`) and `args` = 2 bytes + the `hash-lock.bc` code hash (32) + its hash type (1) + the expected hash (32) = 67 bytes, so the unlock transaction needs two `cell_deps`: the interpreter and the bytecode. The cell occupies 8 + 32 + 1 + 67 = 108 CKB, so 61 CKB is the minimum only for the default lock (see Week 2). An address encodes the whole lock including `args`, so each preimage gives a different address.
 
-12. **Tooling notes from this week.**
-    - The docs lag the template: the template uses edition 2024, `deploy_cell_by_name` and plain `capacity(1000)`; its generated `test_simple_lock` uses 1-byte `args`, which my lock rejects with 12, so I removed it as the docs suggest.
-    - `ckb-std` 1.1 compiles a small C helper with clang; the template asks for clang 16 or newer. On Ubuntu 22.04 with clang 14 the build worked with `CLANG=clang` and `/usr/lib/llvm-14/bin` on `PATH` (for `llvm-ar`).
-    - `cargo install ckb-debugger` stops without `protoc`; `offckb install ckb-debugger` downloads a prebuilt, checksum-verified binary instead.
-    - pnpm 12 blocks dependency build scripts (`pnpm approve-builds`; I set esbuild and unrs-resolver to `true` and secp256k1 to `false`, which falls back to pure JavaScript).
-    - `offckb deploy` asks for a Y/n confirmation; the tutorial's `pnpm run deploy` cannot pass `--yes`.
-
-<!-- TODO(user): your own takeaways: what surprised you, what is still unclear, questions for Neon. -->
-
 ## Evidence
 
 | # | Step | Command / action | Result | Evidence |
