@@ -19,7 +19,6 @@ Reimbursement is pro-rata and tied directly to your reporting log: if you miss o
 **Once per week.** Pick a day and submit your report every week on that day.  
 **Contemporaneous**. Each published report must reflect the week just completed. You should not compile reports for all weeks at the end of the month. Multiple reports published at once to cover multiple weeks will count as just one report and reimbursed accordingly.  
 **Published on GitHub** in your personal CKBuilder repository.  
-**An accurate reflection** of your progress. Use your log as an opportunity to share what you learned, what you found interesting or challenging, and what you plan to work on moving forward. Include screenshots and other evidence of progress. You can use AI to tidy up your writing, but avoid using AI to generate your reports.
 
 ## Introduction
 

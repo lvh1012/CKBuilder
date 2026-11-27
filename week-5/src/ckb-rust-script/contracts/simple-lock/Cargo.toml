@@ -1,0 +1,15 @@
+[package]
+name = "simple-lock"
+version = "0.1.0"
+edition = "2024"
+
+[dependencies]
+ckb-std = "1.1"
+# CKB's blake2b-256 uses its own personalization ("ckb-default-hash"), so use
+# this crate instead of a generic blake2b. Inside a contract the C/std backends
+# must be off and the `ckb-contract` feature on.
+ckb-hash = { version = "1.1", default-features = false, features = ["ckb-contract"] }
+
+[features]
+library = []
+native-simulator = ["library", "ckb-std/native-simulator"]
